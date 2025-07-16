@@ -2,7 +2,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_cors import CORS
-from helpers.user import create_admin
+from helpers.admin import create_admin
 from flask_jwt_extended import JWTManager
 
 from config.constant import DATABASE_URI  
