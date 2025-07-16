@@ -3,7 +3,6 @@ from flask_jwt_extended import jwt_required
 from flask import request
 from models.trackam import Project
 from config.db import db
-
 from flask import jsonify
 
 @jwt_required()
@@ -27,7 +26,6 @@ def create_project():
     db.session.add(new_project)
     db.session.commit()
     return {"message": "Projet créé", "id": new_project.id}, 201
-
 
 
 def get_all_projects():
