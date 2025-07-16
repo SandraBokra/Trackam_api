@@ -2,10 +2,12 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_cors import CORS
+from helpers.tasks import *
 from helpers.user import create_admin
 
-from config.constant import DATABASE_URI  
+from config.constant import DATABASE_URI
 from config.db import db
+from resources.tasks import TaskApi
 from resources.user import UserApi
 
 
@@ -20,6 +22,10 @@ db.init_app(app)
 api = Api(app)
 
 migrate= Migrate(app, db)
+
+api.add_resource(TaskApi, '/tasks/<string:route>')
+
+
 api.add_resource(UserApi, '/auth/<string:route>')
 
 
