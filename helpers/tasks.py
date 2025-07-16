@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.trackam import db, Task, User, Project, Tag
 from datetime import datetime
@@ -30,14 +30,16 @@ def create_task():
         if not assigned_user:
             return {"message": "Utilisateur assigné non trouvé."}, 404
 
-        # Récupère l'ID du projet si fourni
+        # Rendre obligatoire le champ project_id
         project_id = data.get('project_id')
-        if project_id:
-            # Recherche le projet en base
-            project = Project.query.get(project_id)
-            # Si le projet n'existe pas, renvoie une erreur 404
-            if not project:
-                return {"message": "Projet non trouvé."}, 404
+        if not project_id:
+            return {"message": "Le champ 'project_id' est obligatoire."}, 400
+
+        # Vérifie que le projet existe
+        project = Project.query.get(project_id)
+        if not project:
+            return {"message": "Projet non trouvé."}, 404
+
 
         # Récupère la description, le statut, la priorité depuis les données reçues
         description = data.get('description')

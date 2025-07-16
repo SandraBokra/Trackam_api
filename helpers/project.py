@@ -3,6 +3,7 @@ from flask import request
 from models.trackam import Project
 from config.db import db
 
+from flask import jsonify
 
 def create_project():
     data = request.get_json()
@@ -15,8 +16,8 @@ def create_project():
         return {"message": "Tous les champs sont requis"}, 400
 
     try:
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+        start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
     except ValueError:
         return {"message": "Format de date invalide. Utilisez YYYY-MM-DD"}, 400
 
@@ -26,7 +27,6 @@ def create_project():
     return {"message": "Projet créé", "id": new_project.id}, 201
 
 
-from flask import jsonify
 
 def get_all_projects():
     projects = Project.query.all()
@@ -43,12 +43,31 @@ def get_all_projects():
     return jsonify(data), 200
 
 
+def get_project():
+    project_id = request.args.get("id")
+    if not project_id:
+        return {"message": "ID requis"}, 400
+
+    project = Project.query.filter_by(id=project_id).first()
+    if not project:
+        return {"message": "Projet non trouvé"}, 404
+
+    data = {
+        "id": project.id,
+        "name": project.name,
+        "description": project.description,
+        "start_date": project.start_date.strftime("%Y-%m-%d"),
+        "end_date": project.end_date.strftime("%Y-%m-%d") if project.end_date else None,
+    }
+    return jsonify(data), 200
+
+
 def update_project():
     project_id = request.args.get("id")
     if not project_id:
         return {"message": "ID requis"}, 400
 
-    up_project = Project.query.get(project_id)
+    up_project = Project.query.filter_by(id=project_id).first()
     if not up_project:
         return {"message": "Projet non trouvé"}, 404
 
@@ -72,15 +91,17 @@ def update_project():
 
     return {"message": "Mise à jour réussie"}
 
+
 def delete_project():
     project_id = request.args.get("id")
     if not project_id:
         return {"message": "ID requis"}, 400
 
-    new_project = Project.query.get(project_id)
+    new_project = Project.query.filter_by(id=project_id).first()
     if not new_project:
         return {"message": "Projet non trouvé"}, 404
 
     db.session.delete(new_project)
     db.session.commit()
     return {"message": "Projet supprimé"}
+
