@@ -17,10 +17,6 @@ CORS(app)
 # ✅ Configuration obligatoire
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Met une vraie clé en prod
 
-# ✅ Initialisation du JWT
-jwt = JWTManager(app)
-
-
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
