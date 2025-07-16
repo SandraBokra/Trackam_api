@@ -2,9 +2,9 @@ from models.trackam import User
 from config.db import db
 import bcrypt
 from datetime import timedelta
-from flask_jwt_extended import create_access_token,jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token
 import re
-from flask import request, jsonify
+from flask import request
 
 
 login_attempts = {}
@@ -56,7 +56,6 @@ def login_user():
                 "email": login_user.email,
                 "role": login_user.role,
                 "created_at": login_user.created_at.isoformat(),  # Converti proprement
-                # "email_verified": login_user.email_verified
             }
 
             return {
