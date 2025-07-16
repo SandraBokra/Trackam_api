@@ -26,18 +26,22 @@ def create_project():
     return {"message": "Projet créé", "id": new_project.id}, 201
 
 
+from flask import jsonify
+
 def get_all_projects():
     projects = Project.query.all()
-    return [
-        {"id": p.id, 
-         "name": p.name, 
-         "description": p.description, 
-         "start_date": p.start_date.strftime("%Y-%m-%d"),
-         "end_date": p.end_date.strftime("%Y-%m-%d") if p.end_date else None,
-
+    data = [
+        {
+            "id": p.id,
+            "name": p.name,
+            "description": p.description,
+            "start_date": p.start_date.strftime("%Y-%m-%d"),
+            "end_date": p.end_date.strftime("%Y-%m-%d") if p.end_date else None,
         }
         for p in projects
     ]
+    return jsonify(data), 200
+
 
 def update_project():
     project_id = request.args.get("id")
