@@ -1,10 +1,12 @@
 import datetime
+from flask_jwt_extended import jwt_required
 from flask import request
 from models.trackam import Project
 from config.db import db
 
 from flask import jsonify
 
+@jwt_required()
 def create_project():
     data = request.get_json()
     name = data.get("name")
