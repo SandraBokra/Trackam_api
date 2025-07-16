@@ -67,3 +67,16 @@ def update_project():
     db.session.commit()
 
     return {"message": "Mise à jour réussie"}
+
+def delete_project():
+    project_id = request.args.get("id")
+    if not project_id:
+        return {"message": "ID requis"}, 400
+
+    new_project = Project.query.get(project_id)
+    if not new_project:
+        return {"message": "Projet non trouvé"}, 404
+
+    db.session.delete(new_project)
+    db.session.commit()
+    return {"message": "Projet supprimé"}
