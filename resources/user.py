@@ -1,5 +1,6 @@
 from flask_restful import Resource
-from helpers.user import *
+from helpers.auth import *
+from helpers.admin import create_user
 
 class UserApi(Resource):
     
