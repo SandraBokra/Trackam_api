@@ -116,11 +116,10 @@ def create_admin():
         if not existing_admin:
             admin_password = hash_password('admin123')
             admin = User(
-                username='admin',
+                full_name='admin',
                 email='admin@example.com',
                 password=admin_password.decode('utf-8'),
                 role='admin',
-                email_verified=True  # On considère que l’admin est validé
             )
             db.session.add(admin)
             db.session.commit()
