@@ -3,33 +3,37 @@ from helpers.tasks import *
 
 class TaskApi(Resource):
 
-    @jwt_required()
-    def get(self, route, task_id=None):
-        if route == "all":
-            return get_tasks()
-        elif route == "one" and task_id:
-            return get_task(task_id)
-        else:
-            return {"message": f"Route GET inconnue ou ID manquant : {route}"}, 400
-
-    @jwt_required()
     def post(self, route, task_id=None):
         if route == "create":
             return create_task()
         else:
             return {"message": f"Route POST inconnue : {route}"}, 400
 
-    @jwt_required()
+    def get(self, route, task_id=None):
+        if route == "all":
+            return get_tasks()
+        elif route == "one":
+            if task_id is None:
+                return {"message": "task_id est requis pour 'one'"}, 400
+            return get_task(task_id)
+        else:
+            return {"message": f"Route GET inconnue : {route}"}, 400
+
     def put(self, route, task_id=None):
-        if route == "update" and task_id:
+        if route == "update":
+            if task_id is None:
+                return {"message": "task_id est requis pour 'update'"}, 400
             return update_task(task_id)
         else:
-            return {"message": f"Route PUT inconnue ou ID manquant : {route}"}, 400
+            return {"message": f"Route PUT inconnue : {route}"}, 400
 
-    @jwt_required()
     def delete(self, route, task_id=None):
-        if route == "delete" and task_id:
+        if route == "delete":
+            if task_id is None:
+                return {"message": "task_id est requis pour 'delete'"}, 400
             return delete_task(task_id)
         else:
-            return {"message": f"Route DELETE inconnue ou ID manquant : {route}"}, 400
+            return {"message": f"Route DELETE inconnue : {route}"}, 400
+
+
 
