@@ -6,6 +6,7 @@ from helpers.admin import create_admin
 from flask_jwt_extended import JWTManager
 from config.constant import DATABASE_URI
 from config.db import db
+from resources.comment_task import CommentApi
 from resources.project import ProjectApi
 from resources.tasks import TaskApi
 from resources.user import UserApi
@@ -28,6 +29,7 @@ migrate= Migrate(app, db)
 api.add_resource(UserApi, '/auth/<string:route>', methods=["GET","POST","PATCH","DELETE"])
 api.add_resource(TaskApi, '/tasks/<string:route>', '/tasks/<string:route>/<int:task_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 api.add_resource(ProjectApi, '/projects/<string:route>',  methods=['GET', 'POST','PUT', 'DELETE'])
+api.add_resource(CommentApi, '/comments/<string:route>', '/comments/<string:route>/<int:comment_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 
 
 with app.app_context():
