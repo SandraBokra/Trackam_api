@@ -1,0 +1,29 @@
+"""Créer un environnement virtuel"""
+python3 -m venv venv
+
+"""Activer l'environnement virtuel"""
+Sous Linux/macOS : source venv/bin/activate
+Sous Windows : venv\Scripts\activate
+
+""" nouvelles dépendances"""
+pip install flask
+
+# Pour mettre à jour le fichier requirements.txt après avoir ajouté une lib :
+pip freeze > requirements.txt
+
+"""Installer les dépendances"""
+pip install -r requirements.txt
+
+"""Configurer les variables d'environnement (si besoin)"""
+
+bash
+export FLASK_APP=app.py
+export FLASK_ENV=development
+
+powershel
+set FLASK_APP=app.py
+set FLASK_ENV=development
+
+
+Lancer l'application
+python3 app.py

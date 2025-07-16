@@ -9,7 +9,7 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     role = db.Column(db.String(50), default="member")  # member, admin
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
+    password=db.Column(db.String(255), nullable=False)
     tasks = db.relationship('Task', backref='user', lazy=True)
 
 class Project(db.Model):
@@ -46,7 +46,7 @@ class Comment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     user = db.relationship('User', backref='comments')
-    
+
 task_tags = db.Table('task_tags',
     db.Column('task_id', db.Integer, db.ForeignKey('task.id'), primary_key=True),
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
