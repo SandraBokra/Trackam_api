@@ -31,7 +31,7 @@ api.add_resource(UserApi, '/auth/<string:route>', methods=["GET","POST","PATCH",
 api.add_resource(TaskApi, '/tasks/<string:route>', '/tasks/<string:route>/<int:task_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 api.add_resource(ProjectApi, '/projects/<string:route>',  methods=['GET', 'POST','PUT', 'DELETE'])
 api.add_resource(CommentApi, '/comments/<string:route>', '/comments/<string:route>/<int:comment_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-api.add_resource(TagApi, '/tags/<string:route>', methods=['POST'])
+api.add_resource(TagApi, '/tags/<string:route>', methods=['POST', 'GET', 'PUT', 'DELETE'])
 
 with app.app_context():
     db.create_all()

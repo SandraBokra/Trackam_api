@@ -39,7 +39,7 @@ def create_tag():
         "tag": {
             "id": new_tag.id,
             "name": new_tag.name,
-            "tasks": [{"id": t.id, "titre": t.titre} for t in new_tag.tasks]
+            "tasks": [{"id": t.id, "titre": t.title} for t in new_tag.tasks]
         }
     }, 201
 
@@ -52,33 +52,69 @@ def get_all_tags():
         result.append({
             'id': tag.id,
             'name': tag.name,
-            'tasks': [{'id': task.id, 'titre': task.titre} for task in tag.tasks]
+            'tasks': [{'id': task.id, 'titre': task.title} for task in tag.tasks]
         })
 
     return {"tags": result}, 200
 
 
 
-def get_tag(tag_id):
-    tag = Tag.query.get(tag_id)
+def get_tag():
+    tag_id = request.args.get("id")
+    if not tag_id:
+        return {"message": "ID requis"}, 400
 
+    tag = Tag.query.filter_by(id=tag_id).first()
     if not tag:
-        return {"error": "Tag non trouvé"}, 404
+        return {"message": "Tag non trouvé"}, 404
 
     return ({"tag": {
         'id': tag.id,
         'name': tag.name,
-        'tasks': [{'id': task.id, 'titre': task.titre} for task in tag.tasks]
+        'tasks': [{'id': task.id, 'titre': task.title} for task in tag.tasks]
     }}, 200)
 
 
-def delete_tag(tag_id):
-    tag = Tag.query.get(tag_id)
+def delete_tag():
+    tag_id = request.args.get("id")
+    if not tag_id:
+        return {"message": "ID requis"}, 400
 
-    if not tag:
-        return {"error": "Tag non trouvé"}, 404
+    new_tag = Tag.query.filter_by(id=tag_id).first()
+    if not new_tag:
+        return {"message": "Tag non trouvé"}, 404
 
-    db.session.delete(tag)
+    db.session.delete(new_tag)
     db.session.commit()
+    return {"message": "Tag supprimé"}
 
-    return {"message": f"Tag {tag_id} supprimé avec succès"}, 200
+
+
+def update_tag():
+    tag_id = request.args.get("id")  
+    if not tag_id:
+        return {"message": "ID du tag requis"}, 400
+
+    data = request.get_json()
+    name = data.get("name")
+    task_ids = data.get("task_ids")
+
+    tag = Tag.query.get(tag_id)
+    if not tag:
+        return {"message": "Tag introuvable"}, 404
+
+    if name:
+        tag.name = name.strip()
+
+    if task_ids is not None:
+        tasks = []
+        for id in task_ids:
+            task = Task.query.get(id)
+            if task:
+                tasks.append(task)
+        if not tasks:
+            return {"message": "Aucune tâche valide trouvée pour associer au tag"}, 404
+        tag.tasks = tasks
+
+    db.session.commit()
+    return {"message": "Tag mis à jour avec succès"}, 200
