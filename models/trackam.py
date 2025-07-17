@@ -44,7 +44,6 @@ class Comment(db.Model):
 
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
     user = db.relationship('User', backref='comments')
 
 task_tags = db.Table('task_tags',
