@@ -1,14 +1,28 @@
 from flask_restful import Resource
 from helpers.auth import *
-from helpers.admin import create_user
+from helpers.user import *
 
 class UserApi(Resource):
     
     def post(self, route):
-        if route == "register":
-            return create_user()
+        if route == "create_user":
+            return CreateUser()
 
-        if route == "login":
-            return login_user()
-        else:
-            return {"message": f"Route POST inconnue : {route}"}, 400
+        if route == "get_all_member":
+            return GetAllMember()
+        
+        if route == "get_all_admin":
+            return GetAllAdmin()
+
+        if route == "get_single_member":
+            return GetSingleMember()
+        
+        if route == "get_single_admin":
+            return GetSingleAdmin()
+        
+        if route == "delete_user":
+            return DeleteUser()
+        
+        if route == "login_user":
+            return LoginUser()
+        

@@ -6,25 +6,20 @@ class TagApi(Resource):
 
     def post(self, route):
         if route == "create_tag":
-            return create_tag()
-        else:
-            return {"message": f"Route POST inconnue : {route}"}, 400
+            return CreateTag()
+        
+        if route == "get_single_tag":
+            return GetSingleTag()
+
+        if route == "delete_tag":
+            return DeleteTag()
+        
+        if route == "update_tag":
+            return UpdateTag()
+       
         
     def get(self, route):
-        if route == "readAll_tags":
-            return get_all_tags()
-        elif route == "readOne_tag":
-            return get_tag()
-        else:
-            return {"message": f"Route GET inconnue : {route}"}, 400
+          if route == "get_all_tags":
+            return GetAllTag()
 
-    def delete(self, route):
-        if route == "delete_tag":
-            return delete_tag()
-        else:
-            return {"message": f"Route DELETE inconnue : {route}"}, 400
-    def put(self, route):
-        if route == "update_tag":
-            return update_tag()
-        else:
-            return {"message": f"Route PUT inconnue : {route}"}, 400
+
