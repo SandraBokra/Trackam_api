@@ -6,26 +6,21 @@ class ProjectApi(Resource):
 
     def post(self, route):
         if route == "create_project":
-            return create_project()
-        else:
-            return {"message": f"Route POST inconnue : {route}"}, 400
+            return CreateProject()
 
-    def get(self, route):
-        if route == "readAll_projects":
-            return get_all_projects()
-        elif route == "readOne_project":
-            return get_project()
-        else:
-            return {"message": f"Route GET inconnue : {route}"}, 400
-
-    def put(self, route):
+        if route == "get_single_project":
+            return GetSingleProject()
+        
         if route == "update_project":
-            return update_project()
-        else:
-            return {"message": f"Route PUT inconnue : {route}"}, 400
-
-    def delete(self, route):
+            return UpdateProject()
+    
         if route == "delete_project":
-            return delete_project()
-        else:
-            return {"message": f"Route DELETE inconnue : {route}"}, 400
+            return DeleteProject()
+
+    
+    def get(self, route):
+        if route == "get_all_projects":
+            return GetAllProjects()
+        
+
+

@@ -23,7 +23,7 @@ def LoginUser():
             rs['full_name'] = login_user.full_name
             rs['email'] = login_user.email
             rs['role'] = login_user.role
-            rs['created_at'] = login_user.created_at
+            rs['created_at'] = str(login_user.created_at)
             rs['password'] = login_user.password
 
             reponse['status'] = 'success'

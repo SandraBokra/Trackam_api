@@ -6,7 +6,7 @@ from config.db import db
 from flask import jsonify
 
 
-def create_project():
+def CreateProject():
     data = request.get_json()
     name = data.get("name")
     description = data.get("description")
@@ -28,7 +28,7 @@ def create_project():
     return {"message": "Projet créé", "uid": new_project.uid}, 201
 
 
-def get_all_projects():
+def GetAllProjects():
     projects = Project.query.all()
     data = [
         {
@@ -43,7 +43,7 @@ def get_all_projects():
     return jsonify(data), 200
 
 
-def get_project():
+def GetSingleProject():
     project_id = request.json.get("uid")
     if not project_id:
         return {"message": "ID requis"}, 400
@@ -62,7 +62,7 @@ def get_project():
     return jsonify(data), 200
 
 
-def update_project():
+def UpdateProject():
     project_id = request.json.get("uid")
     if not project_id:
         return {"message": "ID requis"}, 400
@@ -92,7 +92,7 @@ def update_project():
     return {"message": "Mise à jour réussie"}
 
 
-def delete_project():
+def DeleteProject():
     project_id = request.json.get("uid")
     if not project_id:
         return {"message": "ID requis"}, 400

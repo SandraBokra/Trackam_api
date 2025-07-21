@@ -13,7 +13,7 @@ def CreateTag():
     data = request.get_json()
     name = data.get("name")
     single_tag = Tag.query.filter_by(name=name).first()
-    if not single_tag :
+    if single_tag :
         return {"message": "Ce tag existe deja"}, 400
 
     new_tag = Tag()
@@ -71,15 +71,15 @@ def DeleteTag():
 
 
 def UpdateTag():
-
-    tag_id = request.json.get("uid")  
-    if not tag_id:
-        return {"message": "ID du tag requis"}, 400
-    update_tag = Tag.query.filter_by(uid=tag_id).first()
+    name=request.json.get("name") 
+    uid = request.json.get("uid") 
+    if not uid or not name :
+        return {"message": "ID ou name du tag requis"}, 400
+    update_tag = Tag.query.filter_by(uid=uid).first()
     if not update_tag:
         return {"message": "Tag non trouvé"}, 404
     
-    update_tag.name = request.json.get("name")  
+    update_tag.name =name
     db.session.add(update_tag)
     db.session.commit()
        

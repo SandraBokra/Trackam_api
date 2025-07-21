@@ -58,4 +58,4 @@ class Tag(db.Model):
     uid = db.Column(db.String(128), unique=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(128), unique=True)
 
-    tasks = db.relationship('Task', backref=db.backref('tags', lazy='dynamic'))
+    tasks = db.relationship('Task', backref=db.backref('tags'))
