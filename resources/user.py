@@ -8,9 +8,6 @@ class UserApi(Resource):
         if route == "create_user":
             return CreateUser()
 
-        if route == "get_all_member":
-            return GetAllMember()
-        
         if route == "get_all_admin":
             return GetAllAdmin()
 
@@ -25,4 +22,8 @@ class UserApi(Resource):
         
         if route == "login_user":
             return LoginUser()
+        
+    def get(self, route):
+        if route == "get_all_member":
+            return GetAllMember()
         

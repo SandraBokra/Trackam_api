@@ -28,6 +28,7 @@ def CreateUser():
 
         reponse['status'] = 'success'
 
+
     except Exception as e:
         reponse['error_description'] = str(e)
         reponse['status'] = 'error'
@@ -44,10 +45,10 @@ def GetAllMember():
         for user in users:
             if user.role == "member":
                 result.append({
-                    'id': user.id,
+                    'id': user.uid,
                     'full_name': user.full_name,
                     'email': user.email,
-                    'role': user.role
+                    'role': user.role,
                 })
 
         reponse['status'] = 'success'
@@ -69,7 +70,7 @@ def GetAllAdmin():
         for user in users:
             if user.role == "admin":
                 result.append({
-                    'id': user.id,
+                    'id': user.uid,
                     'full_name': user.full_name,
                     'email': user.email,
                     'role': user.role
