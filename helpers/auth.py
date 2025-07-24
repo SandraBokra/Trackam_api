@@ -1,7 +1,7 @@
 from models.trackam import User
 import bcrypt
 from flask_jwt_extended import create_access_token
-from flask import request
+from flask import jsonify, request
 
 
 
@@ -28,6 +28,7 @@ def LoginUser():
 
             reponse['status'] = 'success'
             reponse['message'] = 'Login successful'
+            reponse['role'] = login_user.role
             reponse['user_infos'] = rs
             reponse['access_token'] = access_token
 
@@ -39,4 +40,4 @@ def LoginUser():
         reponse['status'] = 'error'
         reponse['message'] = str(e)
 
-    return reponse 
+    return jsonify(reponse) 
