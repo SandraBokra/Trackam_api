@@ -15,7 +15,6 @@ from resources.user import UserApi
 app = Flask(__name__)
 CORS(app)
 
-
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
