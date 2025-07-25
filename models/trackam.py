@@ -22,6 +22,9 @@ class Project(db.Model):
     start_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     end_date = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(50), default='active')  # active, completed, archived
+    
+    user_id = db.Column(db.String(128), db.ForeignKey('user.uid'), nullable=False)
+    user = db.relationship('User', backref='projects')
 
     tasks = db.relationship('Task', backref='project', lazy=True)
 

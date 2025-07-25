@@ -12,8 +12,9 @@ def CreateProject():
     description = data.get("description")
     start_date_str = data.get("start_date")
     end_date_str = data.get("end_date")
+    user_id = data.get("user_id")
 
-    if not name or not description or not start_date_str or not end_date_str:
+    if not name or not description or not start_date_str or not end_date_str or not user_id:
         return {"message": "Tous les champs sont requis"}, 400
 
     try:
@@ -22,7 +23,7 @@ def CreateProject():
     except ValueError:
         return {"message": "Format de date invalide. Utilisez YYYY-MM-DD"}, 400
 
-    new_project = Project(name=name, description=description, start_date=start_date, end_date=end_date)
+    new_project = Project(name=name, description=description, start_date=start_date, end_date=end_date,user_id=user_id)
     db.session.add(new_project)
     db.session.commit()
     return {"message": "Projet créé", "uid": new_project.uid}, 201
@@ -37,6 +38,7 @@ def GetAllProjects():
             "description": p.description,
             "start_date": str(p.start_date.strftime("%Y-%m-%d")),
             "end_date": str(p.end_date.strftime("%Y-%m-%d")) if p.end_date else None,
+
         }
         for p in projects
     ]
@@ -105,3 +107,23 @@ def DeleteProject():
     db.session.commit()
     return {"message": "Projet supprimé"}
 
+def GetAllProjectsByUserId():
+    user_id = request.json.get("user_id")
+    if not user_id:
+        return {"message": "user_id requis"}, 400
+
+    projects = Project.query.filter_by(user_id=user_id).order_by(Project.start_date.desc()).all()
+
+    data = [
+        {
+            "uid": p.uid,
+            "name": p.name,
+            "description": p.description,
+            "start_date": p.start_date.strftime("%Y-%m-%d"),
+            "end_date": p.end_date.strftime("%Y-%m-%d") if p.end_date else None,
+            "status": p.status
+        }
+        for p in projects
+    ]
+
+    return data, 200

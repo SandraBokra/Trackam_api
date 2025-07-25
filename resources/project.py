@@ -16,6 +16,9 @@ class ProjectApi(Resource):
     
         if route == "delete_project":
             return DeleteProject()
+        
+        if route == "get_all_projects_by_user":
+            return GetAllProjectsByUserId()
 
     
     def get(self, route):
