@@ -1,4 +1,4 @@
-from flask import request
+from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.trackam import db, Task, User, Project, Tag
 from datetime import datetime
@@ -94,7 +94,7 @@ def get_tasks():
         if current_user.role == "admin":
             tasks = Task.query.all()
         else:
-            tasks = Task.query.filter_by(assigned_to=current_user.uid).all()  # Changement de id à uid
+            tasks = Task.query.filter_by(assigned_to=current_user.uid).all() 
 
         results = []
         for t in tasks:
@@ -110,7 +110,7 @@ def get_tasks():
                 "tags": [tag.name for tag in t.tags]
             })
 
-        return results, 200
+        return jsonify(results), 200
     except Exception as e:
         print("Erreur:", e)
         return {"message": "Erreur serveur"}, 500
