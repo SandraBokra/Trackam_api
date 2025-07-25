@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask
 from flask_migrate import Migrate
 from flask_restful import Api
@@ -18,6 +19,8 @@ CORS(app)
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Durée de validité du token : ici 7 jours
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=7)
 
 db.init_app(app)
 jwt = JWTManager(app)

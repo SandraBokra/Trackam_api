@@ -2,6 +2,7 @@ import datetime
 import uuid
 from config.db import db
 
+# Modèle de l'utilisateur
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(128), unique=True, default=lambda: str(uuid.uuid4()))
@@ -9,11 +10,12 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     role = db.Column(db.String(50), default="member")  # member, admin
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    password=db.Column(db.String(255), nullable=False)
-    
+    password = db.Column(db.String(255), nullable=False)
+
     tasks = db.relationship('Task', backref='user', lazy=True)
 
 
+# Modèle du projet
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(128), unique=True, default=lambda: str(uuid.uuid4()))
@@ -29,6 +31,7 @@ class Project(db.Model):
     tasks = db.relationship('Task', backref='project', lazy=True)
 
 
+# Modèle de la tâche
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(128), unique=True, default=lambda: str(uuid.uuid4()))
@@ -41,10 +44,15 @@ class Task(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     assigned_to = db.Column(db.String(128), db.ForeignKey('user.uid'), nullable=False)
-    tag_id = db.Column(db.String(128), db.ForeignKey('tag.uid'), nullable=False)
     project_id = db.Column(db.String(128), db.ForeignKey('project.uid'), nullable=False)
 
+    # Relation One-to-Many entre Task et Tag
+    tag_id = db.Column(db.String(128), db.ForeignKey('tag.uid'), nullable=True)
+    tag = db.relationship('Tag', backref=db.backref('tasks_in_tag', lazy=True))  # Changer le backref ici
 
+
+
+# Modèle du commentaire
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(128), unique=True, default=lambda: str(uuid.uuid4()))
@@ -56,9 +64,12 @@ class Comment(db.Model):
     user = db.relationship('User', backref='comments')
 
 
+# Modèle du tag
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(128), unique=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(128), unique=True)
 
-    tasks = db.relationship('Task', backref=db.backref('tags'))
+    # Lien inverse des tâches associées (changer le backref ici)
+    tasks = db.relationship('Task', backref='tag_association', lazy=True)  # Nomme le backref différemment
+

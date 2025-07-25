@@ -91,7 +91,7 @@ def create_task():
 def get_tasks():
     try:
         current_uid = get_jwt_identity()
-        print(f"Utilisateur authentifié : {current_uid}")  # Debugging log
+        print(f"Utilisateur authentifié : {current_uid}")
         current_user = User.query.filter_by(email=current_uid).first()
 
         if not current_user:
@@ -100,12 +100,14 @@ def get_tasks():
         if current_user.role == "admin":
             tasks = Task.query.all()
         else:
-            tasks = Task.query.filter_by(assigned_to=current_user.uid).all() 
+            tasks = Task.query.filter_by(assigned_to=current_user.uid).all()
 
         results = []
         for t in tasks:
-            tag = Tag.query.get(t.tag_id)  # Récupère le tag associé à la tâche
-            tag_name = tag.name if tag else None  # Vérifie si un tag existe
+            # ⬇️ ICI : utiliser t.tag_id et non tasks.tag_id
+            tag = Tag.query.filter_by(uid=t.tag_id).first()
+            tag_name = tag.name if tag else None
+
             results.append({
                 "id": t.id,
                 "title": t.title,
@@ -115,13 +117,14 @@ def get_tasks():
                 "due_date": t.due_date.isoformat() if t.due_date else None,
                 "assigned_to": t.assigned_to,
                 "project_id": t.project_id,
-                "tag": tag_name  # Retourne un seul tag
+                "tag": tag_name
             })
 
-        return jsonify(results), 200
+        return results, 200
     except Exception as e:
         print("Erreur:", e)
         return {"message": "Erreur serveur"}, 500
+
 
 
 @jwt_required()
@@ -137,7 +140,7 @@ def get_task(task_id):
         if current_user.role != "admin" and task.assigned_to != current_user.uid:  # Utilisation de uid
             return {"message": "Accès refusé"}, 403
 
-        tag = Tag.query.get(task.tag_id)  # Récupère le tag associé à la tâche
+        tag = Tag.query.filter_by(uid=t.tag_id).first()
         tag_name = tag.name if tag else None  # Vérifie si un tag existe
 
         result = {
@@ -158,6 +161,7 @@ def get_task(task_id):
         return {"message": "Erreur serveur"}, 500
 
 
+@jwt_required()
 def update_task(task_id):
     try:
         task = Task.query.get(task_id)
@@ -200,17 +204,18 @@ def update_task(task_id):
                 return {"message": "Utilisateur assigné non trouvé"}, 404
             task.assigned_to = assigned_to_uid  # Utilisation de uid
 
-        tags_names = data.get('tags')
-        if tags_names is not None:
-            task.tags.clear()
-            for name in tags_names:
-                tag = Tag.query.filter_by(name=name).first()
-                if tag:
-                    task.tags.append(tag)
-                else:
-                    new_tag = Tag(name=name)
-                    db.session.add(new_tag)
-                    task.tags.append(new_tag)
+        # Gestion du tag unique pour la tâche
+        tag_name = data.get('tag')
+        if tag_name:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if tag:
+                task.tag_id = tag.uid  # Associer le tag à la tâche
+            else:
+                # Créer un nouveau tag si il n'existe pas
+                new_tag = Tag(name=tag_name)
+                db.session.add(new_tag)
+                db.session.commit()  # Commit pour obtenir l'uid du tag créé
+                task.tag_id = new_tag.uid  # Associer ce tag à la tâche
 
         db.session.commit()
         return {"message": "Tâche mise à jour"}, 200
@@ -219,22 +224,16 @@ def update_task(task_id):
         return {"message": "Erreur serveur"}, 500
 
 
+@jwt_required()
 def delete_task(task_id):
     try:
         task = Task.query.get(task_id)
         if not task:
             return {"message": "Tâche non trouvée"}, 404
 
-        current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(email=current_uid).first()
-
-        if current_user.role != "admin":
-            return {"message": "Seuls les administrateurs peuvent supprimer une tâche."}, 403
-
         db.session.delete(task)
         db.session.commit()
-
-        return {"message": "Tâche supprimée"}, 200
+        return {"message": "Tâche supprimée avec succès."}, 200
     except Exception as e:
         print("Erreur:", e)
         return {"message": "Erreur serveur"}, 500
