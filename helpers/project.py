@@ -42,7 +42,7 @@ def GetAllProjects():
         }
         for p in projects
     ]
-    return jsonify(data), 200
+    return data, 200
 
 
 def GetSingleProject():

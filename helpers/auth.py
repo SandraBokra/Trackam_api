@@ -29,6 +29,7 @@ def LoginUser():
             reponse['status'] = 'success'
             reponse['message'] = 'Login successful'
             reponse['role'] = login_user.role
+            reponse['uid'] = login_user.uid
             reponse['user_infos'] = rs
             reponse['access_token'] = access_token
 
