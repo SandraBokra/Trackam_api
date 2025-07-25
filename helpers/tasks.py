@@ -3,14 +3,14 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.trackam import db, Task, User, Project, Tag
 from datetime import datetime
 
-@jwt_required()
 
+@jwt_required()
 def create_task():
     try:
-        # Récupérer l'UID de l'utilisateur authentifié à partir du token JWT
+        # Récupérer l'email de l'utilisateur authentifié à partir du token JWT
         current_uid = get_jwt_identity()
 
-        # Chercher l'utilisateur dans la base de données
+        # Chercher l'utilisateur dans la base de données par email
         current_user = User.query.filter_by(email=current_uid).first()
 
         # Si l'utilisateur n'existe pas, renvoyer une erreur
@@ -65,15 +65,18 @@ def create_task():
         )
 
         # Gestion des tags
-        tags_names = request.json.get('tags', [])
-        for tag_name in tags_names:
+        tag_name = request.json.get('tag')  # Assumons qu'il y a un seul tag par tâche
+
+        if tag_name:
             tag = Tag.query.filter_by(name=tag_name).first()
             if tag:
-                new_task.tags.append(tag)
+                new_task.tag_id = tag.uid  # Utilisation de tag_id pour relier la tâche au tag
             else:
+                # Créer un nouveau tag si il n'existe pas
                 new_tag = Tag(name=tag_name)
                 db.session.add(new_tag)
-                new_task.tags.append(new_tag)
+                db.session.commit()  # Commit pour obtenir l'uid du tag créé
+                new_task.tag_id = new_tag.uid  # Associer ce tag à la tâche
 
         db.session.add(new_task)
         db.session.commit()
@@ -84,12 +87,15 @@ def create_task():
         return {"message": "Erreur serveur"}, 500
 
 
-
-
+@jwt_required()
 def get_tasks():
     try:
         current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        print(f"Utilisateur authentifié : {current_uid}")  # Debugging log
+        current_user = User.query.filter_by(email=current_uid).first()
+
+        if not current_user:
+            return {"message": "Utilisateur non trouvé ou non authentifié."}, 401
 
         if current_user.role == "admin":
             tasks = Task.query.all()
@@ -98,6 +104,8 @@ def get_tasks():
 
         results = []
         for t in tasks:
+            tag = Tag.query.get(t.tag_id)  # Récupère le tag associé à la tâche
+            tag_name = tag.name if tag else None  # Vérifie si un tag existe
             results.append({
                 "id": t.id,
                 "title": t.title,
@@ -107,7 +115,7 @@ def get_tasks():
                 "due_date": t.due_date.isoformat() if t.due_date else None,
                 "assigned_to": t.assigned_to,
                 "project_id": t.project_id,
-                "tags": [tag.name for tag in t.tags]
+                "tag": tag_name  # Retourne un seul tag
             })
 
         return results, 200
@@ -116,8 +124,7 @@ def get_tasks():
         return {"message": "Erreur serveur"}, 500
 
 
-
-
+@jwt_required()
 def get_task(task_id):
     try:
         task = Task.query.get(task_id)
@@ -125,10 +132,13 @@ def get_task(task_id):
             return {"message": "Tâche non trouvée"}, 404
 
         current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        current_user = User.query.filter_by(email=current_uid).first()
 
         if current_user.role != "admin" and task.assigned_to != current_user.uid:  # Utilisation de uid
             return {"message": "Accès refusé"}, 403
+
+        tag = Tag.query.get(task.tag_id)  # Récupère le tag associé à la tâche
+        tag_name = tag.name if tag else None  # Vérifie si un tag existe
 
         result = {
             "id": task.id,
@@ -139,7 +149,7 @@ def get_task(task_id):
             "due_date": task.due_date.isoformat() if task.due_date else None,
             "assigned_to": task.assigned_to,
             "project_id": task.project_id,
-            "tags": [tag.name for tag in task.tags]
+            "tag": tag_name  # Retourne un seul tag
         }
 
         return result, 200
@@ -155,7 +165,7 @@ def update_task(task_id):
             return {"message": "Tâche non trouvée"}, 404
 
         current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        current_user = User.query.filter_by(email=current_uid).first()
 
         if current_user.role != "admin" and task.assigned_to != current_user.uid:  # Utilisation de uid
             return {"message": "Accès refusé"}, 403
@@ -216,7 +226,7 @@ def delete_task(task_id):
             return {"message": "Tâche non trouvée"}, 404
 
         current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        current_user = User.query.filter_by(email=current_uid).first()
 
         if current_user.role != "admin":
             return {"message": "Seuls les administrateurs peuvent supprimer une tâche."}, 403
@@ -228,4 +238,3 @@ def delete_task(task_id):
     except Exception as e:
         print("Erreur:", e)
         return {"message": "Erreur serveur"}, 500
-
