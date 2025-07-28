@@ -140,7 +140,7 @@ def get_task(task_id):
         if current_user.role != "admin" and task.assigned_to != current_user.uid:  # Utilisation de uid
             return {"message": "Accès refusé"}, 403
 
-        tag = Tag.query.filter_by(uid=t.tag_id).first()
+        tag = Tag.query.filter_by(uid=t.tag_id).first() # type: ignore
         tag_name = tag.name if tag else None  # Vérifie si un tag existe
 
         result = {

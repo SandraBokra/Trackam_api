@@ -23,6 +23,12 @@ class UserApi(Resource):
         if route == "login_user":
             return LoginUser()
         
+        if route == "update_user":   # <-- ici
+            return UpdateUser()
+        if route == "get_user_profile":
+            return GetUserProfile()
+
+        
     def get(self, route):
         if route == "get_all_member":
             return GetAllMember()
