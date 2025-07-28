@@ -15,7 +15,7 @@ def LoginUser():
         login_user = User.query.filter_by(email=email).first()
 
         if login_user and bcrypt.checkpw(password.encode('utf-8'), login_user.password.encode('utf-8')):
-            
+
             access_token = create_access_token(identity=email)
 
             rs = {}

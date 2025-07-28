@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.trackam import db, Task, User, Project, Tag
+from models.trackam import *
 from datetime import datetime
 
 
@@ -40,6 +40,8 @@ def create_task():
         project = Project.query.filter_by(uid=project_uid).first()
         if not project:
             return {"message": "Projet non trouvé."}, 404
+        
+
 
         description = request.json.get('description')
         status = request.json.get('status', 'pending')  # Statut par défaut 'pending'
@@ -99,8 +101,10 @@ def get_tasks():
 
         if current_user.role == "admin":
             tasks = Task.query.all()
+            nbre= Task.query.count()
         else:
             tasks = Task.query.filter_by(assigned_to=current_user.uid).all()
+            nbre = Task.query.filter_by(assigned_to=current_user.uid).count()
 
         results = []
         for t in tasks:
@@ -117,7 +121,8 @@ def get_tasks():
                 "due_date": t.due_date.isoformat() if t.due_date else None,
                 "assigned_to": t.assigned_to,
                 "project_id": t.project_id,
-                "tag": tag_name
+                "tag": tag_name,
+                "nbre": nbre
             })
 
         return results, 200
@@ -162,8 +167,14 @@ def get_task(task_id):
 
 
 @jwt_required()
-def update_task(task_id):
+def update_task():
     try:
+        data = request.get_json()
+        task_id = data.get('id')
+
+        if not task_id:
+            return {"message": "L'ID de la tâche est obligatoire."}, 400
+
         task = Task.query.get(task_id)
         if not task:
             return {"message": "Tâche non trouvée"}, 404
@@ -171,10 +182,8 @@ def update_task(task_id):
         current_uid = get_jwt_identity()
         current_user = User.query.filter_by(email=current_uid).first()
 
-        if current_user.role != "admin" and task.assigned_to != current_user.uid:  # Utilisation de uid
+        if current_user.role != "admin" and task.assigned_to != current_user.uid:
             return {"message": "Accès refusé"}, 403
-
-        data = request.get_json()
 
         task.title = data.get('title', task.title)
         task.description = data.get('description', task.description)
@@ -190,35 +199,34 @@ def update_task(task_id):
 
         project_uid = data.get('project_id')
         if project_uid:
-            project = Project.query.filter_by(uid=project_uid).first()  # Changement de id à uid
+            project = Project.query.filter_by(uid=project_uid).first()
             if not project:
                 return {"message": "Projet non trouvé"}, 404
-            task.project_id = project_uid  # Utilisation de uid
+            task.project_id = project_uid
 
         assigned_to_uid = data.get('assigned_to')
         if assigned_to_uid:
-            if current_user.role != "admin" and assigned_to_uid != current_user.uid:  # Utilisation de uid
+            if current_user.role != "admin" and assigned_to_uid != current_user.uid:
                 return {"message": "Vous ne pouvez réassigner cette tâche qu'à vous-même."}, 403
-            user = User.query.filter_by(uid=assigned_to_uid).first()  # Changement de id à uid
+            user = User.query.filter_by(uid=assigned_to_uid).first()
             if not user:
                 return {"message": "Utilisateur assigné non trouvé"}, 404
-            task.assigned_to = assigned_to_uid  # Utilisation de uid
+            task.assigned_to = assigned_to_uid
 
-        # Gestion du tag unique pour la tâche
         tag_name = data.get('tag')
         if tag_name:
             tag = Tag.query.filter_by(name=tag_name).first()
             if tag:
-                task.tag_id = tag.uid  # Associer le tag à la tâche
+                task.tag_id = tag.uid
             else:
-                # Créer un nouveau tag si il n'existe pas
                 new_tag = Tag(name=tag_name)
                 db.session.add(new_tag)
-                db.session.commit()  # Commit pour obtenir l'uid du tag créé
-                task.tag_id = new_tag.uid  # Associer ce tag à la tâche
+                db.session.commit()
+                task.tag_id = new_tag.uid
 
         db.session.commit()
         return {"message": "Tâche mise à jour"}, 200
+
     except Exception as e:
         print("Erreur:", e)
         return {"message": "Erreur serveur"}, 500

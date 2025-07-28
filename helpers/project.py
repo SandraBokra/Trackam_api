@@ -107,6 +107,7 @@ def DeleteProject():
     db.session.commit()
     return {"message": "Projet supprimé"}
 
+
 def GetAllProjectsByUserId():
     user_id = request.json.get("user_id")
     if not user_id:
