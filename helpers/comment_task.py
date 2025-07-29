@@ -9,31 +9,31 @@ def create_comment():
     try:
         data = request.get_json()
         content = data.get('content')
-        task_id = data.get('task_id')
+        task_id = data.get('task_id')  # ici task_id = uid (string)
 
         if not content or not task_id:
             return {"message": "Les champs 'content' et 'task_id' sont obligatoires."}, 400
 
-        # Vérifie que la tâche existe
-        task = Task.query.get(task_id)
+        # Cherche la tâche par uid (string), PAS par id (int)
+        task = Task.query.filter_by(uid=task_id).first()
         if not task:
             return {"message": "Tâche non trouvée."}, 404
 
-        # Récupère l'utilisateur connecté
-        current_uid = get_jwt_identity()
-        user = User.query.filter_by(uid=current_uid).first()
+        # Récupère l'utilisateur connecté via email dans le token
+        current_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_email).first()
         if not user:
             return {"message": "Utilisateur non authentifié."}, 401
 
-        # Vérifie que la tâche lui est assignée
-        if task.assigned_to != user.id:
+        # Vérifie que la tâche lui est assignée (assigned_to est uid string)
+        if task.assigned_to != user.uid:
             return {"message": "Vous ne pouvez commenter que les tâches qui vous sont assignées."}, 403
 
-        # Création du commentaire
+        # Création du commentaire (user_id est uid string)
         new_comment = Comment(
             content=content,
-            task_id=task_id,
-            user_id=user.id
+            task_id=task.uid,  # bien mettre uid (string)
+            user_id=user.uid
         )
         db.session.add(new_comment)
         db.session.commit()
@@ -49,13 +49,14 @@ def create_comment():
 @jwt_required()
 def get_comments():
     try:
-        current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        current_email = get_jwt_identity()
+        current_user = User.query.filter_by(email=current_email).first()
 
         if current_user.role == "admin":
             comments = Comment.query.all()
         else:
-            comments = Comment.query.filter_by(user_id=current_user.id).all()
+            # user_id dans Comment est uid string, on filtre par user.uid
+            comments = Comment.query.filter_by(user_id=current_user.uid).all()
 
         result = []
         for c in comments:
@@ -82,10 +83,11 @@ def get_comment(comment_id):
         if not comment:
             return {"message": "Commentaire non trouvé."}, 404
 
-        current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        current_email = get_jwt_identity()
+        current_user = User.query.filter_by(email=current_email).first()
 
-        if comment.user_id != current_user.id and current_user.role != "admin":
+        # Compare toujours avec uid string
+        if comment.user_id != current_user.uid and current_user.role != "admin":
             return {"message": "Accès refusé."}, 403
 
         result = {
@@ -111,20 +113,19 @@ def update_comment(comment_id):
         if not comment:
             return {"message": "Commentaire non trouvé."}, 404
 
-        current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        current_email = get_jwt_identity()
+        current_user = User.query.filter_by(email=current_email).first()
 
-        # Vérifie que l'utilisateur est l'auteur OU un admin
-        if comment.user_id != current_user.id and current_user.role != "admin":
+        # Vérifie auteur ou admin via uid
+        if comment.user_id != current_user.uid and current_user.role != "admin":
             return {"message": "Vous ne pouvez modifier que vos propres commentaires."}, 403
 
-        # Si ce n'est pas un admin, il faut aussi que la tâche soit assignée à lui
+        # Si pas admin, la tâche doit être assignée à lui (uid)
         if current_user.role != "admin":
-            task = Task.query.get(comment.task_id)
-            if task.assigned_to != current_user.id:
+            task = Task.query.filter_by(uid=comment.task_id).first()
+            if not task or task.assigned_to != current_user.uid:
                 return {"message": "Vous ne pouvez modifier un commentaire que sur une tâche qui vous est assignée."}, 403
 
-        # Traitement de la modification
         data = request.get_json()
         content = data.get('content')
 
@@ -149,20 +150,18 @@ def delete_comment(comment_id):
         if not comment:
             return {"message": "Commentaire non trouvé."}, 404
 
-        current_uid = get_jwt_identity()
-        current_user = User.query.filter_by(uid=current_uid).first()
+        current_email = get_jwt_identity()
+        current_user = User.query.filter_by(email=current_email).first()
 
-        # Vérification d’accès
+        # Si pas admin, vérifier que c’est auteur ET tâche assignée à lui
         if current_user.role != "admin":
-            # Si ce n’est pas un admin, il faut être auteur ET la tâche doit être assignée à lui
-            if comment.user_id != current_user.id:
+            if comment.user_id != current_user.uid:
                 return {"message": "Seul l’auteur ou un admin peut supprimer ce commentaire."}, 403
 
-            task = Task.query.get(comment.task_id)
-            if task.assigned_to != current_user.id:
+            task = Task.query.filter_by(uid=comment.task_id).first()
+            if not task or task.assigned_to != current_user.uid:
                 return {"message": "Vous ne pouvez supprimer un commentaire que sur une tâche qui vous est assignée."}, 403
 
-        # Suppression
         db.session.delete(comment)
         db.session.commit()
 

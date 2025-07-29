@@ -29,7 +29,11 @@ migrate= Migrate(app, db)
 api.add_resource(UserApi, '/api/auth/<string:route>', endpoint='all_auth', methods=['GET', 'POST', 'DELETE', 'PATCH'])
 api.add_resource(TaskApi, '/api/tasks/<string:route>', endpoint='all_tasks', methods=['GET', 'POST', 'DELETE', 'PATCH'])
 api.add_resource(ProjectApi, '/api/projects/<string:route>', endpoint='all_projects', methods=['GET', 'POST', 'DELETE', 'PATCH'])
-api.add_resource(CommentApi, '/api/comments/<string:route>', endpoint='all_comments', methods=['GET', 'POST', 'DELETE', 'PATCH'])
+api.add_resource(CommentApi,
+    '/api/comments/<string:route>',
+    '/api/comments/<string:route>/<string:comment_id>',
+    endpoint='all_comments',
+    methods=['GET', 'POST', 'DELETE', 'PATCH'])
 api.add_resource(TagApi, '/api/tags/<string:route>', endpoint='all_tags', methods=['GET', 'POST', 'DELETE', 'PATCH'])
 
 with app.app_context():
