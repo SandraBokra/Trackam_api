@@ -114,6 +114,7 @@ def get_tasks():
 
             results.append({
                 "id": t.id,
+                "uid": t.uid,
                 "title": t.title,
                 "description": t.description,
                 "status": t.status,
@@ -150,6 +151,7 @@ def get_task(task_id):
 
         result = {
             "id": task.id,
+            "uid": task.uid,
             "title": task.title,
             "description": task.description,
             "status": task.status,
@@ -242,6 +244,36 @@ def delete_task(task_id):
         db.session.delete(task)
         db.session.commit()
         return {"message": "Tâche supprimée avec succès."}, 200
+    except Exception as e:
+        print("Erreur:", e)
+        return {"message": "Erreur serveur"}, 500
+
+
+@jwt_required()
+def update_task_status():
+    try:
+        data = request.get_json()
+        task_id = data.get('uid')
+        new_status = data.get('status')
+
+        if not task_id or not new_status:
+            return {"message": "Les champs 'uid' et 'status' sont requis."}, 400
+
+        task = Task.query.filter_by(uid=task_id).first()
+        if not task:
+            return {"message": "Tâche non trouvée"}, 404
+
+        current_uid = get_jwt_identity()
+        current_user = User.query.filter_by(email=current_uid).first()
+
+        if current_user.role != "admin" and task.assigned_to != current_user.uid:
+            return {"message": "Accès refusé"}, 403
+
+        task.status = new_status
+        db.session.commit()
+
+        return {"message": "Statut de la tâche mis à jour avec succès"}, 200
+
     except Exception as e:
         print("Erreur:", e)
         return {"message": "Erreur serveur"}, 500

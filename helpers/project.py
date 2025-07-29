@@ -95,9 +95,10 @@ def UpdateProject():
 
 
 def DeleteProject():
+    print("Request JSON reçue :", request.json)
     project_id = request.json.get("uid")
     if not project_id:
-        return {"message": "ID requis"}, 400
+        return {"message": "UID requis"}, 400
 
     new_project = Project.query.filter_by(uid=project_id).first()
     if not new_project:

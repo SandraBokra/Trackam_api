@@ -3,9 +3,11 @@ from helpers.tasks import *
 
 class TaskApi(Resource):
 
-    def post(self, route, task_id=None):
+    def post(self, route):
         if route == "create":
             return create_task()
+        elif route == "update_status":
+            return update_task_status()
         else:
             return {"message": f"Route POST inconnue : {route}"}, 400
 

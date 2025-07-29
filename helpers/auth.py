@@ -6,8 +6,6 @@ from flask import jsonify, request
 
 
 def LoginUser():
-    reponse = {}
-
     try:
         email = request.json.get('email')
         password = request.json.get('password')
@@ -15,30 +13,33 @@ def LoginUser():
         login_user = User.query.filter_by(email=email).first()
 
         if login_user and bcrypt.checkpw(password.encode('utf-8'), login_user.password.encode('utf-8')):
-
             access_token = create_access_token(identity=email)
 
-            rs = {}
-            rs['uid'] = login_user.uid
-            rs['full_name'] = login_user.full_name
-            rs['email'] = login_user.email
-            rs['role'] = login_user.role
-            rs['created_at'] = str(login_user.created_at)
-            rs['password'] = login_user.password
+            rs = {
+                'uid': login_user.uid,
+                'full_name': login_user.full_name,
+                'email': login_user.email,
+                'role': login_user.role,
+                'created_at': str(login_user.created_at)
+            }
 
-            reponse['status'] = 'success'
-            reponse['message'] = 'Login successful'
-            reponse['role'] = login_user.role
-            reponse['uid'] = login_user.uid
-            reponse['user_infos'] = rs
-            reponse['access_token'] = access_token
+            return {
+                'status': 'success',
+                'message': 'Login successful',
+                'role': login_user.role,
+                'uid': login_user.uid,
+                'user_infos': rs,
+                'access_token': access_token
+            }, 200
 
-        else:
-            reponse['status'] = 'error'
-            reponse['message'] = 'Invalid username or password'
+        return {
+            'status': 'error',
+            'message': 'Invalid username or password'
+        }, 401
 
     except Exception as e:
-        reponse['status'] = 'error'
-        reponse['message'] = str(e)
+        return {
+            'status': 'error',
+            'message': str(e)
+        }, 500
 
-    return jsonify(reponse) 
