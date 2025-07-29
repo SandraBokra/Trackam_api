@@ -28,7 +28,7 @@ class Project(db.Model):
     user_id = db.Column(db.String(128), db.ForeignKey('user.uid'), nullable=False)
     user = db.relationship('User', backref='projects')
 
-    tasks = db.relationship('Task', backref='project', lazy=True)
+    tasks = db.relationship('Task', backref='project', lazy=True, cascade="all, delete-orphan")
 
 
 # Modèle de la tâche
@@ -44,7 +44,7 @@ class Task(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     assigned_to = db.Column(db.String(128), db.ForeignKey('user.uid'), nullable=False)
-    project_id = db.Column(db.String(128), db.ForeignKey('project.uid'), nullable=False)
+    project_id = db.Column(db.String(128), db.ForeignKey('project.uid', ondelete='CASCADE'), nullable=False)
 
     # Relation One-to-Many entre Task et Tag
     tag_id = db.Column(db.String(128), db.ForeignKey('tag.uid'), nullable=True)
