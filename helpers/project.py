@@ -110,6 +110,7 @@ def DeleteProject():
 
 def GetAllProjectsByUserId():
     user_id = request.json.get("user_id")
+    print("Données reçues dans backend:", data)  # Debug affichage des données reçues
     if not user_id:
         return {"message": "user_id requis"}, 400
 
