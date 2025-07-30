@@ -27,7 +27,13 @@ api = Api(app)
 migrate= Migrate(app, db)
 
 api.add_resource(UserApi, '/api/auth/<string:route>', endpoint='all_auth', methods=['GET', 'POST', 'DELETE', 'PATCH'])
-api.add_resource(TaskApi, '/api/tasks/<string:route>', endpoint='all_tasks', methods=['GET', 'POST', 'DELETE', 'PATCH'])
+api.add_resource(
+    TaskApi,
+    '/api/tasks/<string:route>',
+    '/api/tasks/<string:route>/<int:task_id>',
+    endpoint='all_tasks',
+    methods=['GET', 'POST', 'PUT', 'DELETE']
+)
 api.add_resource(ProjectApi, '/api/projects/<string:route>', endpoint='all_projects', methods=['GET', 'POST', 'DELETE', 'PATCH'])
 api.add_resource(CommentApi,
     '/api/comments/<string:route>',

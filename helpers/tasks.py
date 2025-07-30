@@ -169,14 +169,8 @@ def get_task(task_id):
 
 
 @jwt_required()
-def update_task():
+def update_task(task_id, data):
     try:
-        data = request.get_json()
-        task_id = data.get('id')
-
-        if not task_id:
-            return {"message": "L'ID de la tâche est obligatoire."}, 400
-
         task = Task.query.get(task_id)
         if not task:
             return {"message": "Tâche non trouvée"}, 404
@@ -232,6 +226,7 @@ def update_task():
     except Exception as e:
         print("Erreur:", e)
         return {"message": "Erreur serveur"}, 500
+
 
 
 @jwt_required()
