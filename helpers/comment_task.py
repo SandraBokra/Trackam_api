@@ -170,3 +170,41 @@ def delete_comment(comment_id):
     except Exception as e:
         print("Erreur suppression commentaire :", e)
         return {"message": "Erreur serveur"}, 500
+
+
+@jwt_required()
+def get_task_comments():
+    try:
+        data = request.get_json()
+        task_id = data.get('task_id')
+
+        if not task_id:
+            return {"message": "Le champ 'task_id' est requis."}, 400
+
+        current_email = get_jwt_identity()
+        current_user = User.query.filter_by(email=current_email).first()
+
+        if current_user.role == "admin":
+            comments = Comment.query.filter_by(task_id=task_id).all()
+        else:
+            comments = Comment.query.filter_by(
+                task_id=task_id,
+                user_id=current_user.uid
+            ).all()
+
+        result = [
+            {
+                "id": c.id,
+                "content": c.content,
+                "created_at": c.created_at.isoformat(),
+                "task_id": c.task_id,
+                "user_id": c.user_id
+            }
+            for c in comments
+        ]
+
+        return result, 200
+
+    except Exception as e:
+        print("Erreur récupération commentaires :", e)
+        return {"message": "Erreur serveur"}, 500

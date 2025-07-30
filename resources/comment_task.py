@@ -6,12 +6,15 @@ class CommentApi(Resource):
     def post(self, route, comment_id=None):
         if route == "CreateComment":
             return create_comment()
+        elif route == "MyComment":
+            return get_task_comments()
         else:
             return {"message": f"Route POST inconnue : {route}"}, 400
 
     def get(self, route, comment_id=None):
         if route == "AllComment":
             return get_comments()
+    
         elif route == "OneComment":
             if comment_id is None:
                 return {"message": "comment_id est requis pour 'one'"}, 400

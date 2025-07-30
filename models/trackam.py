@@ -56,7 +56,7 @@ class Task(db.Model):
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(128), unique=True, default=lambda: str(uuid.uuid4()))
-    content = db.Column(db.Text, nullable=False)
+    content = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     task_id = db.Column(db.String(128), db.ForeignKey('task.uid'), nullable=False)
